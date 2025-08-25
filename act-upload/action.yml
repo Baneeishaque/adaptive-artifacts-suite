@@ -1,0 +1,25 @@
+name: ACT Upload (simulate)
+description: Simulate artifact upload by copying to a local ACT artifact store
+author: banee-io
+branding:
+  color: gray-dark
+  icon: upload
+inputs:
+  name:
+    description: Artifact name
+    required: true
+  path:
+    description: File/directory or glob to upload
+    required: true
+  if-no-files-found:
+    description: error | warn | ignore
+    default: warn
+  overwrite:
+    description: Whether to overwrite existing content at destination
+    default: 'false'
+  act-root:
+    description: Root directory for ACT artifacts
+    default: .act/artifacts
+runs:
+  using: node20
+  main: index.js

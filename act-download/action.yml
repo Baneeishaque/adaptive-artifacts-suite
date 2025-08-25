@@ -1,0 +1,22 @@
+name: ACT Download (simulate)
+description: Simulate artifact download by copying from a local ACT artifact store
+author: banee-io
+branding:
+  color: gray-dark
+  icon: download
+inputs:
+  name:
+    description: Artifact name
+    required: true
+  path:
+    description: Target directory
+    required: true
+  clean:
+    description: Remove target before download
+    default: 'false'
+  act-root:
+    description: Root directory for ACT artifacts
+    default: .act/artifacts
+runs:
+  using: node20
+  main: index.js

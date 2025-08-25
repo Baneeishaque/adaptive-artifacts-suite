@@ -1,0 +1,51 @@
+name: Artifact upload (adaptive)
+description: Upload via GitHub artifact service when available, else simulate under ACT
+author: Banee Ishaque K
+branding:
+  color: blue
+  icon: upload-cloud
+inputs:
+  name:
+    description: Artifact name
+    required: true
+  path:
+    description: File/directory or glob to upload
+    required: true
+  if-no-files-found:
+    description: error | warn | ignore
+    default: warn
+  compression-level:
+    description: 0-9 (service only)
+    default: '6'
+  overwrite:
+    description: Whether to overwrite existing artifact (service + fallback)
+    default: 'false'
+  retention-days:
+    description: Retention in days (service only)
+    default: '7'
+  act-root:
+    description: Root directory for ACT artifacts (fallback)
+    default: .act/artifacts
+runs:
+  using: composite
+  steps:
+    - name: Upload via GitHub artifact service
+      if: ${{ env.ACT != 'true' && env.ACTIONS_RUNTIME_TOKEN != '' && env.ACTIONS_RUNTIME_URL != '' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+        if-no-files-found: ${{ inputs.if-no-files-found }}
+        compression-level: ${{ inputs.compression-level }}
+        overwrite: ${{ inputs.overwrite }}
+        retention-days: ${{ inputs.retention-days }}
+
+    - name: Fallback to ACT simulation
+      if: ${{ env.ACT == 'true' || env.ACTIONS_RUNTIME_TOKEN == '' || env.ACTIONS_RUNTIME_URL == '' }}
+      uses: ./act-upload
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+        if-no-files-found: ${{ inputs.if-no-files-found }}
+        overwrite: ${{ inputs.overwrite }}
+        act-root: ${{ inputs.act-root }}

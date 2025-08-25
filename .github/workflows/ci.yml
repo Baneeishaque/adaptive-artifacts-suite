@@ -1,0 +1,171 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  node-tests:
+    name: Unit tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [18, 20]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci
+      - run: npm test
+
+  integration-service:
+    name: Adaptive (service path)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare sample
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sample/src/sub
+          echo alpha > sample/src/a.txt
+          echo beta > sample/src/sub/b.txt
+
+      - name: Upload (dir)
+        uses: ./upload
+        with:
+          name: suite-dir
+          path: sample/src
+          if-no-files-found: error
+          overwrite: true
+
+      - name: Download (dir)
+        uses: ./download
+        with:
+          name: suite-dir
+          path: sample/dl
+
+      - name: Verify roundtrip (dir)
+        run: diff -r sample/src sample/dl
+
+      - name: Upload (file)
+        uses: ./upload
+        with:
+          name: suite-file
+          path: sample/src/a.txt
+          overwrite: true
+
+      - name: Download (file)
+        uses: ./download
+        with:
+          name: suite-file
+          path: sample/dl2
+
+      - name: Verify file present
+        run: test -f sample/dl2/a.txt
+
+      - name: "Negative: no files found (error)"
+        id: neg1
+        continue-on-error: true
+        uses: ./upload
+        with:
+          name: should-fail
+          path: sample/src/nope*.txt
+          if-no-files-found: error
+      - name: Assert failure occurred
+        if: steps.neg1.outcome == 'success'
+        run: exit 1
+
+      - name: "Negative: overwrite protection (service)"
+        id: neg2
+        continue-on-error: true
+        uses: ./upload
+        with:
+          name: suite-dir
+          path: sample/src
+          overwrite: false
+      - name: Assert overwrite failure
+        if: steps.neg2.outcome == 'success'
+        run: exit 1
+
+  integration-fallback:
+    name: Adaptive (fallback path)
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      ACTIONS_RUNTIME_TOKEN: ""
+      ACTIONS_RUNTIME_URL: ""
+      ACT: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare sample
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sample/src/sub
+          echo alpha > sample/src/a.txt
+          echo beta > sample/src/sub/b.txt
+
+      - name: Upload adaptive (dir, fallback)
+        uses: ./upload
+        with:
+          name: suite-dir
+          path: sample/src
+          if-no-files-found: error
+          overwrite: true
+          act-root: .act/artifacts
+
+      - name: Download adaptive (dir, fallback)
+        uses: ./download
+        with:
+          name: suite-dir
+          path: sample/dl
+          clean: true
+          act-root: .act/artifacts
+
+      - name: Verify roundtrip
+        shell: bash
+        run: diff -r sample/src sample/dl
+
+      - name: act-upload (glob)
+        uses: ./act-upload
+        with:
+          name: glob-art
+          path: sample/src/*.txt
+          if-no-files-found: error
+          overwrite: true
+          act-root: .act/artifacts
+
+      - name: act-download
+        uses: ./act-download
+        with:
+          name: glob-art
+          path: sample/dl2
+          clean: true
+          act-root: .act/artifacts
+
+      - name: Verify glob preserved tree
+        shell: bash
+        run: test -f sample/dl2/sample/src/a.txt
+
+      - name: "Negative: overwrite protection (fallback)"
+        id: neg3
+        continue-on-error: true
+        uses: ./upload
+        with:
+          name: suite-dir
+          path: sample/src
+          overwrite: false
+          act-root: .act/artifacts
+      - name: Assert overwrite failure
+        if: steps.neg3.outcome == 'success'
+        run: exit 1

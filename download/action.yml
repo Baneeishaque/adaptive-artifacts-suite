@@ -1,0 +1,41 @@
+name: Artifact download (adaptive)
+description: Download via GitHub artifact service when available, else simulate under ACT
+author: Banee Ishaque K
+branding:
+  color: blue
+  icon: download-cloud
+inputs:
+  name:
+    description: Artifact name to download
+    required: true
+  path:
+    description: Target directory
+    required: true
+  merge-multiple:
+    description: Merge multiple artifacts with same name (service only)
+    default: 'false'
+  clean:
+    description: Remove target path before downloading (fallback only)
+    default: 'false'
+  act-root:
+    description: Root directory for ACT artifacts (fallback)
+    default: .act/artifacts
+runs:
+  using: composite
+  steps:
+    - name: Download via GitHub artifact service
+      if: ${{ env.ACT != 'true' && env.ACTIONS_RUNTIME_TOKEN != '' && env.ACTIONS_RUNTIME_URL != '' }}
+      uses: actions/download-artifact@v5
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+        merge-multiple: ${{ inputs.merge-multiple }}
+
+    - name: Fallback to ACT simulation
+      if: ${{ env.ACT == 'true' || env.ACTIONS_RUNTIME_TOKEN == '' || env.ACTIONS_RUNTIME_URL == '' }}
+      uses: ./act-download
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+        clean: ${{ inputs.clean }}
+        act-root: ${{ inputs.act-root }}

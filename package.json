@@ -1,0 +1,19 @@
+{
+  "name": "smart-artifacts",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Adaptive artifact actions with ACT fallback",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "node -e \"process.exit(0)\""
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0",
+    "@types/node": "^20.11.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
