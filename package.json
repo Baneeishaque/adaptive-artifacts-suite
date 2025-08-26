@@ -1,19 +1,29 @@
 {
   "name": "smart-artifacts",
-  "private": true,
   "version": "1.0.0",
-  "description": "Adaptive artifact actions with ACT fallback",
+  "description": "Adaptive artifact actions with ACT fallback (GitHub + local)",
+  "private": true,
+  "license": "MIT",
+  "author": "banee-io",
   "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build:upload": "ncc build src/upload.ts -o act-upload/dist --source-map --license licenses.txt",
+    "build:download": "ncc build src/download.ts -o act-download/dist --source-map --license licenses.txt",
+    "build": "npm run typecheck && npm run build:upload && npm run build:download",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "lint": "node -e \"process.exit(0)\""
+    "test:watch": "vitest"
   },
   "devDependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^5.0.3",
+    "@vercel/ncc": "^0.38.1",
+    "fast-glob": "^3.3.2",
+    "fs-extra": "^11.2.0",
+    "typescript": "^5.5.4",
     "vitest": "^1.6.0",
-    "@types/node": "^20.11.0"
+    "@types/node": "^20.14.10"
   },
   "engines": {
     "node": ">=18"
-  },
-  "license": "MIT"
+  }
 }

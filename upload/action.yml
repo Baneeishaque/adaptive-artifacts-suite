@@ -1,31 +1,36 @@
-name: Artifact upload (adaptive)
-description: Upload via GitHub artifact service when available, else simulate under ACT
-author: Banee Ishaque K
-branding:
-  color: blue
-  icon: upload-cloud
+name: "Adaptive Artifacts: Upload"
 inputs:
   name:
     description: Artifact name
     required: true
+    type: string
   path:
     description: File/directory or glob to upload
     required: true
+    type: string
   if-no-files-found:
-    description: error | warn | ignore
-    default: warn
-  compression-level:
-    description: 0-9 (service only)
-    default: '6'
+    required: false
+    default: error
+    options: [error, warn, ignore]
   overwrite:
-    description: Whether to overwrite existing artifact (service + fallback)
-    default: 'false'
+    required: false
+    default: false
+    type: boolean
+  clean:
+    required: false
+    default: false
+    type: boolean
+  max-size-mb:
+    required: false
+    type: number
   retention-days:
-    description: Retention in days (service only)
-    default: '7'
+    required: false
+    type: number
   act-root:
-    description: Root directory for ACT artifacts (fallback)
+    required: false
     default: .act/artifacts
+    type: string
+
 runs:
   using: composite
   steps:

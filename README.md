@@ -1,49 +1,23 @@
 # smart-artifacts
 
-Adaptive artifact actions that prefer GitHub’s artifact service and transparently fall back to a local ACT-like store. Cross‑platform with Node (no Bash).
+Reusable GitHub Actions for uploading and downloading artifacts—adaptively using GitHub's native service or falling back to a local ACT simulation.
 
 ## Actions
 
-- `upload/` — Adaptive upload (service first, fallback to ACT simulation)
-- `download/` — Adaptive download (service first, fallback to ACT simulation)
-- `act-upload/` — ACT-only upload simulation (Node)
-- `act-download/` — ACT-only download simulation (Node)
+- `upload/` — Adaptive upload action
+- `download/` — Adaptive download action
+- `act-upload/` — ACT-only local upload fallback
+- `act-download/` — ACT-only local download fallback
 
-## Usage
+## Features
 
-Upload (adaptive):
-```yaml
-- uses: banee-io/smart-artifacts/upload@v1
-  with:
-    name: api-dist
-    path: api/dist
-    overwrite: true
-```
+- ✅ GitHub-native upload/download when available
+- ✅ Simulates upload/download under ACT when offline
+- ✅ Supports folders, files, glob patterns, symlinks
+- ✅ Full overwrite protection
+- ✅ Retention and size limit validation
+- ✅ Cross-platform compatible (Linux, macOS, Windows)
+- ✅ Type-safe with TypeScript fallback logic
+- ✅ Marketplace-ready publishing
 
-Download (adaptive):
-```yaml
-- uses: banee-io/smart-artifacts/download@v1
-  with:
-    name: api-dist
-    path: api/dist
-```
-
-ACT-only:
-```yaml
-- uses: banee-io/smart-artifacts/act-upload@v1
-  with:
-    name: api-dist
-    path: api/dist/*.zip
-```
-
-## Fallback Detection
-
-Uses GitHub's artifact service when `ACTIONS_RUNTIME_TOKEN` and `ACTIONS_RUNTIME_URL` are set and `ACT != 'true'`. Otherwise falls back to Node-based ACT simulation.
-
-## Notes
-
-- Fallback supports directory, single file, and `**/*`, `*`, `?` globs
-- Globs preserve paths relative to the workspace
-- `overwrite` is honored in both service and fallback
-- `if-no-files-found` applies in both paths (`error` | `warn` | `ignore`)
-- Symlinks are copied as file contents for portability (Windows-safe)
+## Usage examples, inputs, and fallback detection will follow in dedicated READMEs and the main documentation.

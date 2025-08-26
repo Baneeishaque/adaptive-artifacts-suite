@@ -1,25 +1,24 @@
-name: Artifact download (adaptive)
-description: Download via GitHub artifact service when available, else simulate under ACT
-author: Banee Ishaque K
-branding:
-  color: blue
-  icon: download-cloud
+name: "Adaptive Artifacts: Download"
 inputs:
   name:
-    description: Artifact name to download
     required: true
+    type: string
   path:
-    description: Target directory
     required: true
+    type: string
   merge-multiple:
-    description: Merge multiple artifacts with same name (service only)
-    default: 'false'
+    required: false
+    default: false
+    type: boolean
   clean:
-    description: Remove target path before downloading (fallback only)
-    default: 'false'
+    required: false
+    default: false
+    type: boolean
   act-root:
-    description: Root directory for ACT artifacts (fallback)
+    required: false
     default: .act/artifacts
+    type: string
+
 runs:
   using: composite
   steps:
